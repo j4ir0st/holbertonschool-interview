@@ -1,18 +1,27 @@
 #include "binary_trees.h"
 
 /**
- * heap_insert - Deallocate a binary tree
- * @root: pointer to the parent node of the node to create
+ * binary_tree_insert_left - inserts a node as the left-child of another \
+node
+ * @parent: pointer to the parent node of the node to create
  * @value: value to put in the new node
- * Return: return the new node
+ * Return: a pointer to the new node, or NULL on failure
  */
 
-heap_t *heap_insert(heap_t **root, int value)
+heap_t *binary_tree_insert_left(heap_t *parent, int value)
 {
-	if (*root == NULL)
-		return (binary_tree_node(*root, value));
+        heap_t *tempNode;
 
-	binary_tree_inorder(*root, value, &binary_insert_left);
+        if (!parent)
+                return (NULL);
+        tempNode = binary_tree_node(parent, value);
+        if (tempNode == NULL)
+                return (NULL);
+        tempNode->left = parent->left;
+        parent->left = tempNode;
+        if (tempNode->left)
+                tempNode->left->parent = tempNode;
+        return (tempNode);
 }
 
 /**
@@ -21,35 +30,32 @@ heap_t *heap_insert(heap_t **root, int value)
  * @func: function to print
  */
 
-void binary_tree_inorder(const heap_t *tree, int value, heap_t (*func)(int))
+heap_t *binary_tree_inorder(heap_t *tree, int value)
 {
-	if (tree == NULL || func == NULL || tree->n < value)
-		return;
-	binary_tree_inorder(tree->left, func);
-	if (tree->n > value)
-		func(value);
-	binary_tree_inorder(tree->right, func);
+	heap_t *left = NULL, *right = NULL;
+
+	if (tree == NULL || tree->n < value)
+		return (NULL);
+	left = binary_tree_inorder(tree->left, value);
+	if (left)
+		return (binary_tree_insert_left(left, value));
+	right = binary_tree_inorder(tree->right, value);
+	if (right)
+                return (binary_tree_insert_left(right, value));
+	return (tree);
 }
 
 /**
- * binary_tree_insert_left - inserts a node as the left-child of another node
- * @parent: pointer to the parent node of the node to create
+ * heap_insert - Deallocate a binary tree
+ * @root: pointer to the parent node of the node to create
  * @value: value to put in the new node
- * Return: a pointer to the new node, or NULL on failure
+ * Return: return the new node
  */
 
-binary_tree_t *binary_tree_insert_left(binary_tree_t *parent, int value)
+heap_t *heap_insert(heap_t **root, int value)
 {
-	binary_tree_t *tempNode;
+        if (*root == NULL)
+                return (binary_tree_node(*root, value));
 
-	if (!parent)
-		return (NULL);
-	tempNode = binary_tree_node(parent, value);
-	if (tempNode == NULL)
-		return (NULL);
-	tempNode->left = parent->left;
-	parent->left = tempNode;
-	if (tempNode->left)
-		tempNode->left->parent = tempNode;
-	return (tempNode);
+        return (binary_tree_inorder(*root, value));
 }
